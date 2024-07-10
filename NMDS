@@ -1,0 +1,24 @@
+library(yyplot)
+library(ggbiplot)
+library(vegan)
+library(ggplot2)
+sample <- read.table("峰面积.txt", sep = "\t",header = T, row.names = 1)
+group <- read.table("峰面积2.txt", sep = "\t", header = T, row.names = 1)
+sample <- t(sample)
+group <- group[match(rownames(sample),rownames(group)),] 
+nmds1 <- metaMDS(sample, distance = 'bray', k = 2)
+summary(nmds1)
+ nmds1.stress <- nmds1$stress
+nmds1.points <- data.frame(nmds1$points)
+nmds1.points$sampleid <- rownames(nmds1.points)
+group$sampleid <- rownames(group)
+ nmds_points <- merge(nmds1.points,group,by='sampleid')
+P <- ggplot(nmds_points,aes(MDS1,MDS2))+scale_shape_manual(values = c(17, 16)) + scale_color_manual(values = c('#F0B142', '#62D6F6','#F14149')) +
+    geom_point(size=5,aes(color=class,shape=sub_class))+
+    stat_ellipse(aes(fill = class),fill= "red",size=0.7,level = 0.8,show.legend = F,linetype = 2)+
+    stat_ellipse(aes(color = class),size=1,level = 0.9,show.legend = F,linetype=3)+theme(legend.key = element_rect(fill = 'transparent'), legend.title = element_blank()) + 
+    labs(x = 'NMDS axis1', y = 'NMDS axis2', title = paste('Stress =', round(nmds1$stress, 4))) +
+    theme(plot.title = element_text(hjust = 0.5))+  
+    theme(panel.grid.major = element_line(color = 'gray',size = 0.1) , panel.background = element_rect(color = 'black', fill = 'transparent'),  plot.title = element_text(hjust = 0.5),legend.title = element_blank())
+
+
