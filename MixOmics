@@ -1,0 +1,24 @@
+library(mixOmics)
+metabolomics_data <- read.delim("E:\\CCNU\\R\\xx\\genus.txt",header = T,sep = '\t',check.names = F,row.names = 1)
+transcriptomics_data <- read.delim("E:\\CCNU\\R\\xx\\meta.txt", header = T,sep = '\t',check.names = F,row.names = 1)
+#检验列名是否一致
+setdiff(colnames(metabolomics_data),colnames(transcriptomics_data))
+#将列名保持一致
+colnames(transcriptomics_data) <- colnames(metabolomics_data)
+
+metabolomics_data <- t(metabolomics_data)
+transcriptomics_data <- t(transcriptomics_data)
+
+data = list(metabolomics = metabolomics_data, transcriptomics = transcriptomics_data)
+design = matrix(1, ncol = length(data), nrow = length(data),
+                dimnames = list(names(data), names(data)))
+diag(design) =  0
+design
+
+# set up a full design where every block is connected
+YourResponseVariable <- c("Control", "Control", "Control", "Treament", "Treament", "Treament")
+YourResponseVariable <- factor(YourResponseVariable)
+list.keepX = list(metabolomics = rep(6,2), transcriptomics = rep(6,2))
+
+data.splda <- block.splsda(X = data, Y = YourResponseVariable, ncomp = ncomp, keepX = list.keepX, design = design)
+plotVar(data.splda, var.names = c(FALSE, FALSE), legend=TRUE, pch=c(16,16))
